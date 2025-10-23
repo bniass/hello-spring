@@ -1,0 +1,45 @@
+name: CI-CD Spring Boot
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Java
+      uses: actions/setup-java@v3
+      with:
+        distribution: temurin
+        java-version: 21
+
+    - name: Build with Maven
+      run: mvn clean package -DskipTests
+
+    - name: Build Docker image
+      run: docker build -t bniass/hello-spring:latest .
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Push Docker image
+      run: docker push bniass/hello-spring:latest
+
+    - name: Set up Kubeconfig
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'v1.27.2'
+
+    - name: Deploy to Kubernetes
+      run: |
+        kubectl set image deployment/hello-spring hello-spring=bniass/hello-spring:latest
+        kubectl rollout status deployment/hello-spring

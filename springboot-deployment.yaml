@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-spring-deployment
+  labels:
+    app: hello-spring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-spring
+  template:
+    metadata:
+      labels:
+        app: hello-spring
+    spec:
+      containers:
+        - name: hello-spring-container
+          image: hello-spring:1.0
+          imagePullPolicy: Never   # indique à Kubernetes d’utiliser l’image locale
+          ports:
+            - containerPort: 8080
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "default"
+          resources:
+            requests:
+              cpu: "250m"      # le Pod demande 0.25 CPU minimum
+              memory: "256Mi"  # le Pod demande 256 Mo minimum
+            limits:
+              cpu: "500m"      # le Pod ne pourra pas dépasser 0.5 CPU
+              memory: "512Mi"  # le Pod ne pourra pas dépasser 512 Mo
