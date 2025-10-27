@@ -20,6 +20,7 @@ jobs:
         java-version: 21
 
     - name: Build with Maven
+      working-directory: ./hello-spring
       run: mvn clean package -DskipTests
 
     - name: Build Docker image
